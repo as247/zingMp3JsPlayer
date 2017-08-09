@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>My music</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+        .container {
+            max-width: 32rem;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 50px;
+        }
+        h1 {
+            font-size: 54px;
+            color: #333;
+            margin: 30px 0 10px;
+        }
+        h2 {
+            font-size: 22px;
+            color: #555;
+        }
+        h3 {
+            text-align: center;
+            font-size: 24px;
+            color: #555;
+        }
+        hr {
+            display: block;
+            width: 7rem;
+            height: 1px;
+            margin: 2.5rem 0;
+            background-color: #eee;
+            border: 0;
+        }
+        a {
+            color: #08c;
+            text-decoration: none;
+        }
+        p {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h3>Music</h3>
+    <div id="player4" class="aplayer">Loading....</div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script src="APlayer.min.js"></script>
+
+<script type="text/javascript">
+    var ids=['ZW79ZBE8','ZW78U908'];
+    var endpoint='http://api.mp3.zing.vn/api/mobile/song/getsonginfo';
+    var thumbServer='http://zmp3-photo.d.za.zdn.vn/thumb/94_94/';
+    var songs={};
+    var total=ids.length;
+    function getSongs(ids,callback){
+        ids.forEach(
+            function(id){
+                $.ajax(endpoint,{
+                    dataType:'jsonp',
+                    data:{requestdata:'{"id":"'+id+'"}'}
+                }).done(function(data){
+                    if(data) {
+                        songs[id] = {
+                            title: data.title,
+                            url: data.source[128],
+                            pic: thumbServer + data.thumbnail,
+                            author:data.artist
+                        };
+                    }else{
+                        songs[id]=false;
+                    }
+                    total--;
+                    if(total<1){
+                        callback();
+                    }
+                });
+            }
+        );
+    }
+    function initPlayer(){
+        var music=[];
+        ids.forEach(function(id){
+           if(songs[id]){
+               music.push(songs[id]);
+           }
+        });
+        if(music.length) {
+            new APlayer({
+                element: document.getElementById("player4"),
+                narrow: false,
+                autoplay: true,
+                showlrc: false,
+                mutex: true,
+                theme: "#ad7a86",
+                mode: "circulation",
+                music: music
+            })
+        }
+
+    }
+    getSongs(ids,initPlayer);
+</script></body>
+</html>
